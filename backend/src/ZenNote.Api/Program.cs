@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
@@ -141,6 +142,15 @@ app.MapHub<NotificationHub>("/hubs/notifications");
 
 try
 {
+    Log.Information("Applying Database Migrations...");
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<ZenNote.Infrastructure.Persistence.ApplicationDbContext>();
+        context.Database.Migrate();
+        Log.Information("Database migrated successfully.");
+    }
+
     Log.Information("Starting ZenNote Web API...");
     app.Run();
 }
